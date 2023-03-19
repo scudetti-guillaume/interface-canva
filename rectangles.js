@@ -4,11 +4,17 @@ export class Rectangle {
         this.y = y;
         this.width = width;
         this.height = height;
+        this.area = width * height;
         this.color = color;
         this.rotation = 0;
         this.animationRotation = 360; // correction: augmenter le nombre de degrés de rotation
         this.context = context;
-        // this.isSelected = false;
+        this.isSelected = false;
+    }
+    
+    getArea() {
+        this.area = this.width * this.height;
+        return this.area;
     }
 
     draw() {
