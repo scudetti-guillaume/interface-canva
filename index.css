@@ -23,7 +23,7 @@ body {
   background-color: rgb(230, 237, 241);
 }
 
-#paint-button {
+#button-color-pair {
 	display: block;
 	margin: auto;
 	margin-top: 10px;
@@ -31,4 +31,7 @@ body {
 	padding: 5px 10px;
 	border-radius: 5px;
 	cursor: pointer;
+	background-color: blueviolet;
+	font-size: larger;
+	font-weight:bold ;
 }

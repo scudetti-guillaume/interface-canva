@@ -5,7 +5,8 @@ const context = canvas.getContext('2d');
 const btnRepaint = document.getElementById('button-color-pair')
 const rectangles = [];
 const excludedColors = []
-const notAllCompleteRotation = [];
+const notCompleteRotation = [];
+let sortRectangles = [];
 let isDragging = false;
 let doubleClickCheck = false;
 
@@ -21,7 +22,7 @@ const resizeCanvas = () => {
 const redrawRectangles = () => {
   context.clearRect(0, 0, canvas.width, canvas.height);
   rectangles.forEach((rectangle, index) => {
-    if (rectangle.x < 0 || rectangle.y < 0 || rectangle.x + rectangle.width > canvas.width || rectangle.y + rectangle.height > canvas.height) {
+    if (rectangle.x < 0 || rectangle.y < 0 || rectangle.x + rectangle.width > canvas.width || rectangle.y + rectangle.height > canvas.height ) {
       rectangles.splice(index, 1);
     } else {
       rectangle.draw(context);
@@ -54,9 +55,10 @@ const getRandomColor = () => {
 const startDragging = (event) => {
   event.preventDefault();
   const color = getRandomColor();
+  const colorPair = '';
   const startX = event.offsetX;
   const startY = event.offsetY;
-  const rectangle = new Rectangle(startX, startY, 0, 0, color, context);
+  const rectangle = new Rectangle(startX, startY, 0, 0, color, colorPair, context);
   rectangles.push(rectangle);
   isDragging = true;
 }
@@ -90,35 +92,29 @@ const animationRectangle = (event) => {
       if (doubleClickX >= rectangle.x && doubleClickX <= rectangle.x + rectangle.width
         && doubleClickY >= rectangle.y && doubleClickY <= rectangle.y + rectangle.height) {
         foundRectangle = rectangle;
+        foundRectangle.isSelected = true;
+      //   console.log(foundRectangle);
       }
     });
-    
    // Si le double click est sur un rectangle
     if (foundRectangle) {
-      notAllCompleteRotation.push(foundRectangle);
-      // const index = rectangles.indexOf(foundRectangle);
-      // rectangles.splice(index, 1);
-      foundRectangle.isSelected = true;
-      // console.log(notAllCompleteRotation.length);
+      notCompleteRotation.push(foundRectangle);
+  
       foundRectangle.animateRotation()
-      // redrawRectangles(foundRectangle);  
-      // console.log(foundRectangle);
-      
-      
+
   // L'animation du rectangle
       const animate = () => {
-        if (foundRectangle.rotation < foundRectangle.animationRotation) {
-          // foundRectangle.animateRotation()
-          // foundRectangle.draw()
-          redrawRectangles();
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        if (foundRectangle.rotation <= foundRectangle.animationRotation) {
           requestAnimationFrame(animate);
+          // foundRectangle.animateRotation()
           
   // Condition pour que toutes soit terminée avant suppression des rectangles
         } else {
-          notAllCompleteRotation.shift()
-          // const index = rectangles.indexOf(foundRectangle);
+          notCompleteRotation.shift()
+       
           for (let i = rectangles.length - 1; i >= 0; i--) {
-            if (notAllCompleteRotation.length === 0 && rectangles[i].isSelected) {
+            if (notCompleteRotation.length === 0 && rectangles[i].isSelected == true) {
               rectangles.splice(i, 1);
             }
           }
@@ -135,27 +131,36 @@ const animationRectangle = (event) => {
 
 const repaint = () => {
 let minDiff = Number.MAX_VALUE;
-let pairRectangles =[];
+ sortRectangles = [];
+
 
  // Trie les rectangles par ordre croissant d'aire
-  rectangles.sort((a, b) => a.getArea() - b.getArea());
-
+ rectangles.sort((a, b) => a.getArea() - b.getArea());
+  
   // Sélectionne la paire de rectangles ayant la plus petite différence d'aire
+  
   for (let i = 0; i < rectangles.length - 1; i++) {
     const diff = rectangles[i + 1].getArea() - rectangles[i].getArea();
     if (diff < minDiff) {
       minDiff = diff;
-      pairRectangles = [rectangles[i], rectangles[i + 1]];
+     sortRectangles = [rectangles[i], rectangles[i + 1]];  
     }
-  }
-  
   // Repeint les deux rectangles sélectionnés avec la même couleur aléatoire
+  let rectangleColorPair = getRandomColor();
+  sortRectangles.forEach(pairRectangle => { 
+    pairRectangle.color = rectangleColorPair
+  pairRectangle.isPaired = true;
+  });
   
-  const colorPair = getRandomColor();
-  pairRectangles.forEach(pairRectangle => {
-    console.log(pairRectangle.area);
-    pairRectangle.color = colorPair
-  })
+  // Réinitialise la propriété isPaired pour les rectangles qui ne font pas partie de la paire
+    // rectangles.forEach(rectangle => {
+    //   if (!sortRectangles.includes(rectangle)) {
+    //     rectangle.isPaired = false;
+    //   }
+    // });
+  
+  }
+  console.log(rectangles);
   redrawRectangles()
 }
 
