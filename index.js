@@ -9,12 +9,8 @@ const notCompleteRotation = [];
 let isDragging = false;
 let doubleClickCheck = false;
 
-// let isPaired = false;
-//let colorPair = null; 
-// let colorOriginal = null ;
-
-
 // Redimensionne le canva en fonction de la taille de la fenêtre
+
 const resizeCanvas = () => {
   canvas.width = canvas.parentElement.clientWidth;
   canvas.height = canvas.parentElement.clientHeight;
@@ -31,21 +27,11 @@ const redrawRectangles = () => {
       rectangle.y < 0 ||
       rectangle.x + rectangle.width > canvas.width ||
       rectangle.y + rectangle.height > canvas.height
-      // ||(notCompleteRotation.length === 0 && rectangle.isSelected === true)
     ) {
       rectangles.splice(index, 1);
     } else {
       rectangle.draw(context);
     }
-    // if(rectangle.isPaired)
-    // {
-    // rectangle.color = colorPair
-    //   rectangle.draw(context);
-    // }else{
-    //   rectangle.color = colorOriginal
-    //   rectangle.draw(context);
-    // }
-
   });
 };
 
@@ -72,10 +58,7 @@ const getRandomColor = () => {
 
 const startDragging = (event) => {
   event.preventDefault();
-  // let colorPair = null;
-  // const colorOriginal = getRandomColor();
   const color = getRandomColor();
-  // const color = isPaired ? colorPair : colorOriginal;
   const startX = event.offsetX;
   const startY = event.offsetY;
   const rectangle = new Rectangle(startX, startY, 0, 0, color, context);
@@ -84,6 +67,7 @@ const startDragging = (event) => {
 };
 
 // Assure le dessin du rectangle
+
 const drag = (event) => {
   if (isDragging) {
     const rectangle = rectangles[rectangles.length - 1];
@@ -94,6 +78,7 @@ const drag = (event) => {
 };
 
 // Stop le dessin du rectangle
+
 const stopDragging = () => {
   isDragging = false;
 };
@@ -162,7 +147,6 @@ const repaint = () => {
     if (diff < minDiff) {
       minDiff = diff;
       sortRectangles = [rectangles[i], rectangles[i + 1]];
-      //  colorPair = getRandomColor();
     }
   }
   // Repeint les deux rectangles sélectionnés avec la même couleur aléatoire
@@ -173,11 +157,12 @@ const repaint = () => {
   });
   
   // Repeindre d'une couleur aléatoire les rectangles sortant de la conditon de l'aire
-
   // Tri les rectangles en dehors de la condition d'aire
+  
   const sortNotPaired = rectangles.filter(rectangle => !sortRectangles.includes(rectangle))
 
   // Identification des rectangles sortant de la condition et recolorisation
+  
   sortNotPaired.forEach((rectangle1, index1) => {
     sortNotPaired.forEach((rectangle2, index2) => {
       if (index1 !== index2 && rectangle1.color === rectangle2.color) {
