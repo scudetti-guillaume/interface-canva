@@ -9,6 +9,11 @@ const notCompleteRotation = [];
 let isDragging = false;
 let doubleClickCheck = false;
 
+// let isPaired = false;
+//let colorPair = null; 
+// let colorOriginal = null ;
+
+
 // Redimensionne le canva en fonction de la taille de la fenêtre
 const resizeCanvas = () => {
   canvas.width = canvas.parentElement.clientWidth;
@@ -25,13 +30,22 @@ const redrawRectangles = () => {
       rectangle.x < 0 ||
       rectangle.y < 0 ||
       rectangle.x + rectangle.width > canvas.width ||
-      rectangle.y + rectangle.height > canvas.height ||
-      (notCompleteRotation.length === 0 && rectangle.isSelected === true)
+      rectangle.y + rectangle.height > canvas.height
+      // ||(notCompleteRotation.length === 0 && rectangle.isSelected === true)
     ) {
       rectangles.splice(index, 1);
     } else {
       rectangle.draw(context);
     }
+    // if(rectangle.isPaired)
+    // {
+    // rectangle.color = colorPair
+    //   rectangle.draw(context);
+    // }else{
+    //   rectangle.color = colorOriginal
+    //   rectangle.draw(context);
+    // }
+
   });
 };
 
@@ -58,11 +72,13 @@ const getRandomColor = () => {
 
 const startDragging = (event) => {
   event.preventDefault();
+  // let colorPair = null;
+  // const colorOriginal = getRandomColor();
   const color = getRandomColor();
-  // const colorPair = getRandomColor();
+  // const color = isPaired ? colorPair : colorOriginal;
   const startX = event.offsetX;
   const startY = event.offsetY;
-  const rectangle = new Rectangle(startX, startY, 0, 0, color,context);
+  const rectangle = new Rectangle(startX, startY, 0, 0, color, context);
   rectangles.push(rectangle);
   isDragging = true;
 };
@@ -100,18 +116,18 @@ const animationRectangle = (event) => {
         doubleClickY >= rectangle.y &&
         doubleClickY <= rectangle.y + rectangle.height
       ) {
-        foundRectangle = rectangle;
-        foundRectangle.isSelected = true;
+      foundRectangle = rectangle
       }
     });
     // Si le double click est sur un rectangle
     if (foundRectangle) {
       // Tableau des rectangles en cour de rotation
       notCompleteRotation.push(foundRectangle);
+      notCompleteRotation.forEach((rectangle)=>{rectangle.isAnimate = true})
       // L'animation du rectangle
       foundRectangle.animateRotation(redrawRectangles);
       const animate = () => {
-        if (foundRectangle.rotation <= foundRectangle.animationRotation) {
+        if (foundRectangle.rotation < foundRectangle.animationRotation) {
           requestAnimationFrame(animate);
         } else {
           // Condition pour que toutes les animations soit terminée avant suppression des rectangles
@@ -119,8 +135,7 @@ const animationRectangle = (event) => {
           for (let i = rectangles.length - 1; i >= 0; i--) {
             // Supression du tableau rectangles des rectangles ayant finis leur animation
             if (
-              notCompleteRotation.length === 0 &&
-              rectangles[i].isSelected == true
+              notCompleteRotation.length === 0 && rectangles[i].isAnimate == true 
             ) {
               // Condition de vérification avant supression des rectangles
               rectangles.splice(i, 1);
@@ -139,17 +154,15 @@ const animationRectangle = (event) => {
 const repaint = () => {
   let minDiff = Number.MAX_VALUE;
   let sortRectangles = [];
-
   // Trie les rectangles par ordre croissant d'aire
   rectangles.sort((a, b) => a.getArea() - b.getArea());
-
   // Sélectionne la paire de rectangles ayant la plus petite différence d'aire
-
   for (let i = 0; i < rectangles.length - 1; i++) {
     const diff = rectangles[i + 1].getArea() - rectangles[i].getArea();
     if (diff < minDiff) {
       minDiff = diff;
       sortRectangles = [rectangles[i], rectangles[i + 1]];
+      //  colorPair = getRandomColor();
     }
   }
   // Repeint les deux rectangles sélectionnés avec la même couleur aléatoire
@@ -157,33 +170,25 @@ const repaint = () => {
   sortRectangles.forEach((pairRectangle) => {
     pairRectangle.isPaired = true;
     pairRectangle.color = colorPair;
-   
+  });
+  
+  // Repeindre d'une couleur aléatoire les rectangles sortant de la conditon de l'aire
+
+  // Tri les rectangles en dehors de la condition d'aire
+  const sortNotPaired = rectangles.filter(rectangle => !sortRectangles.includes(rectangle))
+
+  // Identification des rectangles sortant de la condition et recolorisation
+  sortNotPaired.forEach((rectangle1, index1) => {
+    sortNotPaired.forEach((rectangle2, index2) => {
+      if (index1 !== index2 && rectangle1.color === rectangle2.color) {
+        rectangle1.color = getRandomColor();
+      }
+    });
   });
 
-
-  // rectangles.forEach((rectangle) => {
-  //   if (!sortRectangles.includes(rectangle)) {
-  //     rectangle.isPaired = false;
-  //   }
-  // });
-
-
-
-    // redrawRectangles();
-
-  // } => Pour trier tous les rectangles par paire déplacer la fermeture } de la boucle for précedente ici
-
-  // Réinitialise la propriété isPaired pour les rectangles qui ne font pas partie de la paire
-  // rectangles.forEach(rectangle => {
-  //   if (!sortRectangles.includes(rectangle)) {
-  //     rectangle.isPaired = false;
-  //   }
-  // });
-
-  // sortRectangles = [];
-  console.log(rectangles);
   redrawRectangles();
 };
+
 window.addEventListener("resize", resizeCanvas);
 canvas.addEventListener("mousedown", startDragging);
 canvas.addEventListener("mousemove", drag);
@@ -191,63 +196,7 @@ canvas.addEventListener("mouseup", stopDragging);
 canvas.addEventListener("mouseout", stopDragging);
 canvas.addEventListener("dblclick", animationRectangle);
 btnRepaint.addEventListener("click", repaint);
+
 resizeCanvas();
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const animationRectangle = (event) => {
-//   event.preventDefault();
-//   doubleClickCheck = true
-//   const doubleClickX = event.offsetX;
-//   const doubleClickY = event.offsetY;
-//   // let foundRectangle = null;
-//   // supprime du tableau les deux derniers rectangles créés dû au double click et redessine le tableau
-//   if (doubleClickCheck && rectangles.length >= 2) { // il faut vérifier que le tableau contient au moins deux éléments
-//     rectangles.splice(rectangles.length - 2, 2);
-//     rectangles.forEach((rectangle) => {
-//       if (doubleClickX >= rectangle.x && doubleClickX <= rectangle.x + rectangle.width
-//         && doubleClickY >= rectangle.y && doubleClickY <= rectangle.y + rectangle.height) {
-//         // foundRectangle = rectangle;
-//           rectangle.isSelected = true;
-//           // rectangle.animationInProgress = true;
-//         notCompleteRotation.push(rectangle)
-//         rectangle.animateRotation(context, redrawRectangles, rectangles);
-//         // animate()
-//         // console.log(notCompleteRotation);
-//         console.log(rectangle.animationInProgress);
-//           if (rectangle.animationInProgress === false && rectangle.isSelected === true) {
-
-//             // ne supprimez pas le rectangle s'il y a une animation en cours
-//             notCompleteRotation.shift()
-//             console.log(notCompleteRotation);
-//           }
-//         for (let i = rectangles.length - 1; i >= 0; i--) {
-//             if (notCompleteRotation.length === 0  && rectangles[i].isSelected === true) {
-//               console.log('la');
-//               rectangles.splice(i, 1);
-//             }
-//           }
-//         redrawRectangles();
-//       }
-//     });
-
-//   }}

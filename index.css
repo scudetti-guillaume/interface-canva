@@ -1,7 +1,7 @@
 body {
 	margin: 0;
 	padding: 0;
-	background-color: black;
+	background-color: rgb(23, 22, 22);
 }
 
 #contenair-canvas{
@@ -24,14 +24,21 @@ body {
 }
 
 #button-color-pair {
-	display: block;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100px;
+	height: 40px;
 	margin: auto;
 	margin-top: 10px;
-	font-size: 16px;
+	font-size: 25px;
 	padding: 5px 10px;
 	border-radius: 5px;
 	cursor: pointer;
 	background-color: blueviolet;
-	font-size: larger;
 	font-weight:bold ;
+}
+
+#button-color-pair:hover {
+	background-color: rgb(55, 226, 43);
 }
