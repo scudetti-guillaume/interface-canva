@@ -1,4 +1,4 @@
-﻿# tt-x-gil
+﻿# Interface canva
 
 ## objectifs
 - Tracé de rectangles de couleur aléatoire à la souris.  ✅
